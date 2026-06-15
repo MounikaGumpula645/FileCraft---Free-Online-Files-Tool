@@ -60,19 +60,17 @@
         <p>Choose a JPG/JPEG image</p>
 
         <input
-            type="file"
-            id="imageInput"
-            accept=".jpg,.jpeg">
+        type="file"
+         id="imageInput"
+         accept="image/jpeg,image/jpg"
+         multiple>
 
     </div>
 
-    <div class="preview-box">
-
-        <img
-            id="previewImage"
-            alt="Preview Image">
-
-    </div>
+    <div
+id="previewContainer"
+class="preview-box">
+</div>
 
     <div class="btn-group">
 
@@ -90,87 +88,129 @@
 
 <script>
 
-    let selectedImage = null;
+let selectedImages = [];
 
-    const imageInput =
-        document.getElementById("imageInput");
+const imageInput =
+document.getElementById("imageInput");
 
-    const previewImage =
-        document.getElementById("previewImage");
+const previewContainer =
+document.getElementById("previewContainer");
 
-    imageInput.addEventListener("change", (e) => {
+imageInput.addEventListener("change",(e)=>{
 
-        const file = e.target.files[0];
+selectedImages =
+Array.from(e.target.files);
 
-        if (!file) return;
+previewContainer.innerHTML = "";
 
-        selectedImage = file;
+selectedImages.forEach(file=>{
 
-        previewImage.src =
-            URL.createObjectURL(file);
+const img =
+document.createElement("img");
 
-        previewImage.style.display =
-            "block";
+img.src =
+URL.createObjectURL(file);
 
-    });
+img.style.width =
+"150px";
 
-    document
-        .getElementById("convertBtn")
-        .addEventListener("click", () => {
+img.style.margin =
+"10px";
 
-            if (!selectedImage) {
+img.style.borderRadius =
+"12px";
 
-                alert("Please select a JPG image first.");
+previewContainer.appendChild(img);
 
-                return;
+});
 
-            }
+});
 
-            const reader =
-                new FileReader();
+document
+.getElementById("convertBtn")
+.addEventListener("click",async()=>{
 
-            reader.readAsDataURL(selectedImage);
+if(selectedImages.length===0){
 
-            reader.onload = function () {
+alert(
+"Please select at least one JPG image."
+);
 
-                const { jsPDF } = window.jspdf;
+return;
 
-                const pdf =
-                    new jsPDF();
+}
 
-                const img =
-                    new Image();
+const { jsPDF } =
+window.jspdf;
 
-                img.src =
-                    reader.result;
+const pdf =
+new jsPDF();
 
-                img.onload = function () {
+for(
+let i=0;
+i<selectedImages.length;
+i++
+){
 
-                    const pdfWidth =
-                        pdf.internal.pageSize.getWidth();
+const file =
+selectedImages[i];
 
-                    const pdfHeight =
-                        (pdfWidth * img.height) /
-                        img.width;
+const imageData =
+await new Promise(resolve=>{
 
-                    pdf.addImage(
-                        img,
-                        "JPEG",
-                        0,
-                        0,
-                        pdfWidth,
-                        pdfHeight
-                    );
+const reader =
+new FileReader();
 
-                    pdf.save(
-                        "FileCraft-JPG-to-PDF.pdf"
-                    );
+reader.onload =
+e=>resolve(e.target.result);
 
-                };
+reader.readAsDataURL(file);
 
-            };
+});
 
-        });
+const img =
+await new Promise(resolve=>{
+
+const image =
+new Image();
+
+image.onload =
+()=>resolve(image);
+
+image.src =
+imageData;
+
+});
+
+if(i>0){
+
+pdf.addPage();
+
+}
+
+const pdfWidth =
+pdf.internal.pageSize.getWidth();
+
+const pdfHeight =
+(pdfWidth * img.height)
+/img.width;
+
+pdf.addImage(
+img,
+"JPEG",
+0,
+0,
+pdfWidth,
+pdfHeight
+);
+
+}
+
+pdf.save(
+"FileCraft-JPG-to-PDF.pdf"
+);
+
+});
 
 </script>
 

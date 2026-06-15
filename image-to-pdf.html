@@ -60,16 +60,14 @@ Convert JPG, PNG, JPEG and other image formats into a PDF instantly.
 <input
 type="file"
 id="imageInput"
-accept="image/*">
+accept="image/*"
+multiple>
 
 </div>
 
-<div class="preview-box">
-
-<img
-id="previewImage"
-alt="Preview Image">
-
+<div
+id="previewContainer"
+class="preview-box">
 </div>
 
 <div class="btn-group">
@@ -88,68 +86,112 @@ Convert To PDF
 
 <script>
 
-let selectedImage = null;
+let selectedImages = [];
 
 const imageInput =
 document.getElementById("imageInput");
 
-const previewImage =
-document.getElementById("previewImage");
+const previewContainer =
+document.getElementById("previewContainer");
 
 imageInput.addEventListener("change",(e)=>{
 
-const file = e.target.files[0];
+selectedImages =
+Array.from(e.target.files);
 
-if(!file) return;
+previewContainer.innerHTML = "";
 
-selectedImage = file;
+selectedImages.forEach(file=>{
 
-previewImage.src =
+const img =
+document.createElement("img");
+
+img.src =
 URL.createObjectURL(file);
 
-previewImage.style.display =
-"block";
+img.style.width =
+"150px";
+
+img.style.margin =
+"10px";
+
+img.style.borderRadius =
+"12px";
+
+previewContainer.appendChild(img);
+
+});
 
 });
 
 document
 .getElementById("convertBtn")
-.addEventListener("click",()=>{
+.addEventListener("click",async()=>{
 
-if(!selectedImage){
+if(selectedImages.length===0){
 
-alert("Please select an image first.");
+alert(
+"Please select at least one image."
+);
 
 return;
 
 }
 
-const reader =
-new FileReader();
-
-reader.readAsDataURL(selectedImage);
-
-reader.onload = function(){
-
-const { jsPDF } = window.jspdf;
+const { jsPDF } =
+window.jspdf;
 
 const pdf =
 new jsPDF();
 
+for(
+let i=0;
+i<selectedImages.length;
+i++
+){
+
+const file =
+selectedImages[i];
+
+const imageData =
+await new Promise(resolve=>{
+
+const reader =
+new FileReader();
+
+reader.onload =
+e=>resolve(e.target.result);
+
+reader.readAsDataURL(file);
+
+});
+
 const img =
+await new Promise(resolve=>{
+
+const image =
 new Image();
 
-img.src =
-reader.result;
+image.onload =
+()=>resolve(image);
 
-img.onload = function(){
+image.src =
+imageData;
+
+});
+
+if(i>0){
+
+pdf.addPage();
+
+}
 
 const pdfWidth =
 pdf.internal.pageSize.getWidth();
 
 const pdfHeight =
-(pdfWidth * img.height) /
-img.width;
+(pdfWidth*img.height)
+/img.width;
 
 pdf.addImage(
 img,
@@ -160,15 +202,16 @@ pdfWidth,
 pdfHeight
 );
 
-pdf.save("FileCraft-PDF.pdf");
+}
 
-};
-
-};
+pdf.save(
+"FileCraft-PDF.pdf"
+);
 
 });
 
 </script>
+
 
 </body>
 </html>
