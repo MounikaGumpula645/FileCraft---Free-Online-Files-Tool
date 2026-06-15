@@ -79,7 +79,7 @@ class="convert-btn">
 Convert To PDF
 
 </button>
-
+<div id="statusText"></div>
 </div>
 
 </section>
@@ -127,6 +127,18 @@ previewContainer.appendChild(img);
 document
 .getElementById("convertBtn")
 .addEventListener("click",async()=>{
+const btn =
+document.getElementById("convertBtn");
+
+btn.disabled = true;
+
+btn.innerText =
+"Converting...";
+
+document
+.getElementById("statusText")
+.innerHTML =
+`Converting ${selectedImages.length} image(s)...`;
 
 if(selectedImages.length===0){
 
@@ -207,6 +219,15 @@ pdfHeight
 pdf.save(
 "FileCraft-PDF.pdf"
 );
+btn.disabled = false;
+
+btn.innerText =
+"Convert To PDF";
+
+document
+.getElementById("statusText")
+.innerHTML =
+"✓ Download Started";
 
 });
 
