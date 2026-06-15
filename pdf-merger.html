@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>PDF Merger | FileCraft</title>
+
+<link rel="stylesheet" href="style.css">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+
+</head>
+
+<body>
+
+<header>
+
+<div class="logo">
+
+<img src="images/logo.png" alt="Logo">
+
+<div>
+<h2>FileCraft</h2>
+<p>All-in-One File Tools</p>
+</div>
+
+</div>
+
+<nav>
+
+<a href="index.html">Home</a> <a href="index.html#tools">Tools</a> <a href="index.html#how-it-works">How It Works</a> <a href="index.html#contact">Contact</a>
+
+</nav>
+
+</header>
+
+<section class="tool-page">
+
+<h1>PDF Merger</h1>
+
+<p>
+Upload multiple PDF files and merge them into one document.
+</p>
+
+<div class="upload-box">
+
+<i class="fa-solid fa-file-pdf"></i>
+
+<h3>Select PDF Files</h3>
+
+<p>Choose two or more PDFs</p>
+
+<div id="pdfInputs">
+
+<div class="pdf-row">
+
+<input
+type="file"
+class="pdfFile"
+accept=".pdf">
+
+</div>
+
+</div>
+
+<button
+type="button"
+id="addPdfBtn"
+class="convert-btn">
+
+➕ Add Another PDF
+
+</button>
+</div>
+
+<div
+id="fileList"
+style="margin-top:20px;">
+</div>
+
+<div class="btn-group">
+
+<button
+id="mergeBtn"
+class="convert-btn">
+
+Merge PDFs
+
+</button>
+
+</div>
+
+</section>
+<script>
+
+const pdfInputs =
+document.getElementById("pdfInputs");
+
+document
+.getElementById("addPdfBtn")
+.addEventListener("click",()=>{
+
+const row =
+document.createElement("div");
+
+row.className =
+"pdf-row";
+
+row.innerHTML = `
+
+<input
+type="file"
+class="pdfFile"
+accept=".pdf">
+
+`;
+
+pdfInputs.appendChild(row);
+
+});
+
+document
+.getElementById("mergeBtn")
+.addEventListener("click",async()=>{
+
+const fileInputs =
+document.querySelectorAll(".pdfFile");
+
+const selectedFiles = [];
+
+fileInputs.forEach(input=>{
+
+if(input.files[0]){
+
+selectedFiles.push(
+input.files[0]
+);
+
+}
+
+});
+
+if(selectedFiles.length < 2){
+
+alert(
+"Please select at least 2 PDF files."
+);
+
+return;
+
+}
+
+const mergedPdf =
+await PDFLib.PDFDocument.create();
+
+for(const file of selectedFiles){
+
+const fileBytes =
+await file.arrayBuffer();
+
+const pdf =
+await PDFLib.PDFDocument.load(
+fileBytes
+);
+
+const pages =
+await mergedPdf.copyPages(
+pdf,
+pdf.getPageIndices()
+);
+
+pages.forEach(page=>{
+
+mergedPdf.addPage(page);
+
+});
+
+}
+
+const mergedBytes =
+await mergedPdf.save();
+
+const blob =
+new Blob(
+[mergedBytes],
+{
+type:"application/pdf"
+}
+);
+
+const url =
+URL.createObjectURL(blob);
+
+const a =
+document.createElement("a");
+
+a.href = url;
+
+a.download =
+"FileCraft-Merged.pdf";
+
+a.click();
+
+URL.revokeObjectURL(url);
+
+});
+</script>
+<script>
+
+const pdfInput =
+document.getElementById("pdfInput");
+
+const fileList =
+document.getElementById("fileList");
+
+let selectedFiles = [];
+
+pdfInput.addEventListener("change",(e)=>{
+
+selectedFiles =
+Array.from(e.target.files);
+
+fileList.innerHTML = "";
+
+selectedFiles.forEach(file=>{
+
+const p =
+document.createElement("p");
+
+p.textContent =
+file.name;
+
+fileList.appendChild(p);
+
+});
+
+});
+
+document
+.getElementById("mergeBtn")
+.addEventListener("click",async()=>{
+
+if(selectedFiles.length < 2){
+
+alert(
+"Please select at least 2 PDF files."
+);
+
+return;
+
+}
+
+const mergedPdf =
+await PDFLib.PDFDocument.create();
+
+for(const file of selectedFiles){
+
+const fileBytes =
+await file.arrayBuffer();
+
+const pdf =
+await PDFLib.PDFDocument.load(
+fileBytes
+);
+
+const pages =
+await mergedPdf.copyPages(
+pdf,
+pdf.getPageIndices()
+);
+
+pages.forEach(page=>{
+
+mergedPdf.addPage(page);
+
+});
+
+}
+
+const mergedBytes =
+await mergedPdf.save();
+
+const blob =
+new Blob(
+[mergedBytes],
+{
+type:"application/pdf"
+}
+);
+
+const url =
+URL.createObjectURL(blob);
+
+const a =
+document.createElement("a");
+
+a.href = url;
+
+a.download =
+"FileCraft-Merged.pdf";
+
+a.click();
+
+URL.revokeObjectURL(url);
+
+});
+
+</script>
+
+</body>
+</html>

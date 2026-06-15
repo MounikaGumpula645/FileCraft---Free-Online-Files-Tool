@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>QR Code Generator | FileCraft</title>
+
+<link rel="stylesheet" href="style.css">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+</head>
+
+<body>
+
+<header>
+
+<div class="logo">
+
+<img src="images/logo.png" alt="Logo">
+
+<div>
+<h2>FileCraft</h2>
+<p>All-in-One File Tools</p>
+</div>
+
+</div>
+
+<nav>
+
+<a href="index.html">Home</a> <a href="index.html#tools">Tools</a> <a href="index.html#how-it-works">How It Works</a> <a href="index.html#contact">Contact</a>
+
+</nav>
+
+</header>
+
+<section class="tool-page">
+
+<h1>QR Code Generator</h1>
+
+<p>
+Generate QR codes for links, text, phone numbers, emails and more.
+</p>
+
+<div class="upload-box">
+
+<i class="fa-solid fa-qrcode"></i>
+
+<h3>Enter Text or URL</h3>
+
+<input
+type="text"
+id="qrInput"
+placeholder="https://example.com">
+
+</div>
+
+<div class="btn-group">
+
+<button
+id="generateBtn"
+class="convert-btn">
+
+Generate QR
+
+</button>
+
+</div>
+
+<div id="qrContainer"></div>
+
+<div id="downloadArea"></div>
+
+</section>
+
+<script>
+
+document
+.getElementById("generateBtn")
+.addEventListener("click",()=>{
+
+const value =
+document
+.getElementById("qrInput")
+.value
+.trim();
+
+if(!value){
+
+alert(
+"Please enter text or a URL."
+);
+
+return;
+
+}
+
+const qrContainer =
+document.getElementById(
+"qrContainer"
+);
+
+qrContainer.innerHTML = "";
+
+new QRCode(
+qrContainer,
+{
+text:value,
+width:250,
+height:250
+}
+);
+
+setTimeout(()=>{
+
+const qrImage =
+qrContainer.querySelector("img");
+
+if(qrImage){
+
+document
+.getElementById("downloadArea")
+.innerHTML = `
+
+<a
+href="${qrImage.src}"
+download="FileCraft-QR.png"
+class="convert-btn">
+
+Download QR Code
+
+</a>
+
+`;
+
+}
+
+},300);
+
+});
+
+</script>
+
+</body>
+</html>

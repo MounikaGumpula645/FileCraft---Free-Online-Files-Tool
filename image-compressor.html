@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Image Compressor | FileCraft</title>
+
+<link rel="stylesheet" href="style.css">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+</head>
+
+<body>
+
+<header>
+
+<div class="logo">
+
+<img src="images/logo.png" alt="Logo">
+
+<div>
+<h2>FileCraft</h2>
+<p>All-in-One File Tools</p>
+</div>
+
+</div>
+
+<nav>
+<a href="index.html">Home</a>
+<a href="index.html#tools">Tools</a>
+<a href="index.html#how-it-works">How It Works</a>
+<a href="index.html#contact">Contact</a>
+</nav>
+
+</header>
+
+<section class="tool-page">
+
+<h1>Image Compressor</h1>
+
+<p>
+Reduce image size without losing much quality.
+</p>
+
+<div class="upload-box">
+
+<i class="fa-solid fa-file-image"></i>
+
+<h3>Select Image</h3>
+
+<p>Upload JPG, PNG or WEBP</p>
+
+<input
+type="file"
+id="imageInput"
+accept="image/*">
+
+</div>
+
+<div class="preview-box">
+
+<img
+id="previewImage"
+alt="Preview">
+
+</div>
+
+<div style="margin-top:30px;">
+
+<label>
+
+Compression Quality:
+
+<span id="qualityValue">70</span>%
+
+</label>
+
+<br><br>
+
+<input
+type="range"
+id="qualitySlider"
+min="10"
+max="100"
+value="70">
+
+</div>
+
+<div class="btn-group">
+
+<button
+id="compressBtn"
+class="convert-btn">
+
+Compress Image
+
+</button>
+
+</div>
+
+<div id="sizeInfo" style="margin-top:20px;"></div>
+
+<div
+id="downloadArea"
+style="margin-top:30px;">
+</div>
+
+</section>
+
+<script>
+
+let selectedImage = null;
+
+const imageInput =
+document.getElementById("imageInput");
+
+const previewImage =
+document.getElementById("previewImage");
+
+const qualitySlider =
+document.getElementById("qualitySlider");
+
+const qualityValue =
+document.getElementById("qualityValue");
+
+qualitySlider.addEventListener("input",()=>{
+
+qualityValue.textContent =
+qualitySlider.value;
+
+});
+
+imageInput.addEventListener("change",(e)=>{
+
+selectedImage =
+e.target.files[0];
+
+if(!selectedImage) return;
+
+previewImage.src =
+URL.createObjectURL(selectedImage);
+
+previewImage.style.display =
+"block";
+
+});
+
+document
+.getElementById("compressBtn")
+.addEventListener("click",()=>{
+
+if(!selectedImage){
+
+alert("Please select an image.");
+
+return;
+
+}
+
+const reader =
+new FileReader();
+
+reader.readAsDataURL(selectedImage);
+
+reader.onload = function(event){
+
+const img =
+new Image();
+
+img.src =
+event.target.result;
+
+img.onload = function(){
+
+const canvas =
+document.createElement("canvas");
+
+const ctx =
+canvas.getContext("2d");
+
+canvas.width =
+img.width;
+
+canvas.height =
+img.height;
+
+ctx.drawImage(
+img,
+0,
+0
+);
+
+const quality =
+qualitySlider.value / 100;
+
+canvas.toBlob(
+
+(blob)=>{
+
+const url =
+URL.createObjectURL(blob);
+
+const originalSize =
+(selectedImage.size / 1024).toFixed(2);
+
+const compressedSize =
+(blob.size / 1024).toFixed(2);
+
+const saved =
+(
+100 -
+(blob.size / selectedImage.size * 100)
+).toFixed(1);
+
+document
+.getElementById("sizeInfo")
+.innerHTML = `
+
+<h3>Compression Result</h3>
+
+<p>
+Original Size:
+<b>${originalSize} KB</b>
+</p>
+
+<p>
+Compressed Size:
+<b>${compressedSize} KB</b>
+</p>
+
+<p>
+Space Saved:
+<b>${saved}%</b>
+</p>
+
+`;
+
+document
+.getElementById("downloadArea")
+.innerHTML = `
+
+<a
+href="${url}"
+download="compressed-image.jpg"
+class="convert-btn">
+
+Download Compressed Image
+
+</a>
+
+`;
+
+},
+
+"image/jpeg",
+
+quality
+
+);
+
+};
+
+};
+
+});
+
+</script>
+
+</body>
+
+</html>

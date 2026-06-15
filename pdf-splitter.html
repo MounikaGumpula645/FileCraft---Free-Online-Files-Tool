@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>PDF Splitter | FileCraft</title>
+
+<link rel="stylesheet"
+href="style.css">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+
+</head>
+
+<body>
+
+<header>
+
+<div class="logo">
+
+<img src="images/logo.png" alt="Logo">
+
+<div>
+<h2>FileCraft</h2>
+<p>All-in-One File Tools</p>
+</div>
+
+</div>
+
+<nav>
+
+<a href="index.html">Home</a>
+
+<a href="index.html#tools">Tools</a>
+
+<a href="index.html#how-it-works">How It Works</a>
+
+<a href="index.html#contact">Contact</a>
+
+</nav>
+
+</header>
+
+<section class="tool-page">
+
+<h1>PDF Splitter</h1>
+
+<p>
+Extract specific pages from your PDF file.
+</p>
+
+<div class="upload-box">
+
+<i class="fa-solid fa-scissors"></i>
+
+<h3>Select PDF File</h3>
+
+<p>Upload a PDF document</p>
+
+<input
+type="file"
+id="pdfInput"
+accept=".pdf">
+
+</div>
+
+<div style="margin-top:30px;">
+
+<input
+type="text"
+id="pageRange"
+placeholder="Example: 1-5 or 7">
+
+</div>
+
+<div class="btn-group">
+
+<button
+id="splitBtn"
+class="convert-btn">
+
+Split PDF
+
+</button>
+
+</div>
+
+<div id="resultArea"></div>
+
+</section>
+
+<script>
+
+let selectedPDF = null;
+
+document
+.getElementById("pdfInput")
+.addEventListener(
+"change",
+(e)=>{
+
+selectedPDF =
+e.target.files[0];
+
+}
+);
+
+document
+.getElementById("splitBtn")
+.addEventListener(
+"click",
+async()=>{
+
+if(!selectedPDF){
+
+alert(
+"Please select a PDF file."
+);
+
+return;
+
+}
+
+const range =
+document
+.getElementById(
+"pageRange"
+)
+.value
+.trim();
+
+if(!range){
+
+alert(
+"Please enter page numbers."
+);
+
+return;
+
+}
+
+try{
+
+const pdfBytes =
+await selectedPDF.arrayBuffer();
+
+const pdfDoc =
+await PDFLib.PDFDocument.load(
+pdfBytes
+);
+
+const newPdf =
+await PDFLib.PDFDocument.create();
+
+let pages = [];
+
+if(range.includes("-")){
+
+const parts =
+range.split("-");
+
+const start =
+parseInt(parts[0]);
+
+const end =
+parseInt(parts[1]);
+
+for(
+let i=start;
+i<=end;
+i++
+){
+
+pages.push(i-1);
+
+}
+
+}else{
+
+pages.push(
+parseInt(range)-1
+);
+
+}
+
+const copiedPages =
+await newPdf.copyPages(
+pdfDoc,
+pages
+);
+
+copiedPages.forEach(
+page=>{
+
+newPdf.addPage(
+page
+);
+
+}
+);
+
+const newPdfBytes =
+await newPdf.save();
+
+const blob =
+new Blob(
+[newPdfBytes],
+{
+type:
+"application/pdf"
+}
+);
+
+const url =
+URL.createObjectURL(
+blob
+);
+
+document
+.getElementById(
+"resultArea"
+)
+.innerHTML = `
+
+<div style="margin-top:30px;">
+
+<h3>
+PDF Split Successful
+</h3>
+
+<br>
+
+<a
+href="${url}"
+download="FileCraft-Split-PDF.pdf"
+class="convert-btn">
+
+Download Split PDF
+
+</a>
+
+</div>
+
+`;
+
+}catch(error){
+
+alert(
+"Invalid page range."
+);
+
+}
+
+}
+);
+
+</script>
+
+</body>
+
+</html>

@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>PDF to JPG Converter | FileCraft</title>
+
+<link rel="stylesheet" href="style.css">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+</head>
+
+<body>
+
+<header>
+
+<div class="logo">
+
+<img src="images/logo.png" alt="Logo">
+
+<div>
+<h2>FileCraft</h2>
+<p>All-in-One File Tools</p>
+</div>
+
+</div>
+
+<nav>
+
+<a href="index.html">Home</a> <a href="index.html#tools">Tools</a> <a href="index.html#how-it-works">How It Works</a> <a href="index.html#contact">Contact</a>
+
+</nav>
+
+</header>
+
+<section class="tool-page">
+
+<h1>PDF to JPG Converter</h1>
+
+<p>
+Convert PDF pages into JPG images instantly.
+</p>
+
+<div class="upload-box">
+
+<i class="fa-solid fa-file-pdf"></i>
+
+<h3>Select PDF File</h3>
+
+<p>Upload a PDF to convert</p>
+
+<input
+type="file"
+id="pdfInput"
+accept=".pdf">
+
+</div>
+
+<div class="btn-group">
+
+<button
+id="convertBtn"
+class="convert-btn">
+
+Convert To JPG
+
+</button>
+
+<button
+id="downloadAllBtn"
+class="convert-btn">
+
+Download All Images
+
+</button>
+
+<button
+id="downloadZipBtn"
+class="convert-btn">
+
+Download All (ZIP)
+
+</button>
+
+</div>
+
+<div
+id="imageContainer"
+style="margin-top:40px;">
+</div>
+
+</section>
+
+<script>
+
+let selectedPDF = null;
+
+let convertedImages = [];
+
+document
+.getElementById("pdfInput")
+.addEventListener("change",(e)=>{
+
+selectedPDF =
+e.target.files[0];
+
+});
+
+document
+.getElementById("convertBtn")
+.addEventListener("click",async()=>{
+
+if(!selectedPDF){
+
+alert("Please select a PDF.");
+
+return;
+
+}
+
+const fileReader =
+new FileReader();
+
+fileReader.readAsArrayBuffer(selectedPDF);
+
+fileReader.onload = async function(){
+
+const typedArray =
+new Uint8Array(fileReader.result);
+
+const pdf =
+await pdfjsLib.getDocument(
+typedArray
+).promise;
+
+const container =
+document.getElementById(
+"imageContainer"
+);
+
+container.innerHTML = "";
+convertedImages = [];
+
+for(
+let pageNum = 1;
+pageNum <= pdf.numPages;
+pageNum++
+){
+
+const page =
+await pdf.getPage(pageNum);
+
+const viewport =
+page.getViewport({
+scale:2
+});
+
+const canvas =
+document.createElement(
+"canvas"
+);
+
+const context =
+canvas.getContext("2d");
+
+canvas.height =
+viewport.height;
+
+canvas.width =
+viewport.width;
+
+await page.render({
+
+canvasContext:context,
+viewport:viewport
+
+}).promise;
+
+const imgURL =
+canvas.toDataURL(
+"image/jpeg"
+);
+convertedImages.push({
+
+name:`page-${pageNum}.jpg`,
+
+url:imgURL
+
+});
+
+const img =
+document.createElement(
+"img"
+);
+
+img.src = imgURL;
+
+img.style.maxWidth =
+"500px";
+
+img.style.width =
+"100%";
+
+img.style.display =
+"block";
+
+img.style.margin =
+"20px auto";
+
+img.style.borderRadius =
+"15px";
+
+container.appendChild(
+img
+);
+
+const downloadBtn =
+document.createElement(
+"a"
+);
+
+downloadBtn.href =
+imgURL;
+
+downloadBtn.download =
+`page-${pageNum}.jpg`;
+
+downloadBtn.innerText =
+`Download Page ${pageNum}`;
+
+downloadBtn.className =
+"convert-btn";
+
+downloadBtn.style.display =
+"inline-block";
+
+downloadBtn.style.margin =
+"10px";
+
+container.appendChild(
+downloadBtn
+);
+
+}
+
+};
+
+});
+document
+.getElementById("downloadAllBtn")
+.addEventListener("click",()=>{
+
+if(convertedImages.length===0){
+
+alert("Convert a PDF first.");
+
+return;
+
+}
+
+convertedImages.forEach((image,index)=>{
+
+setTimeout(()=>{
+
+const a =
+document.createElement("a");
+
+a.href = image.url;
+
+a.download = image.name;
+
+a.click();
+
+},index*500);
+
+});
+
+});
+
+document
+.getElementById("downloadZipBtn")
+.addEventListener("click",async()=>{
+
+if(convertedImages.length===0){
+
+alert("Convert a PDF first.");
+
+return;
+
+}
+
+const zip =
+new JSZip();
+
+for(const image of convertedImages){
+
+const response =
+await fetch(image.url);
+
+const blob =
+await response.blob();
+
+zip.file(
+image.name,
+blob
+);
+
+}
+
+const content =
+await zip.generateAsync({
+type:"blob"
+});
+
+saveAs(
+content,
+"FileCraft-JPGs.zip"
+);
+
+});
+
+
+</script>
+
+</body>
+</html>
