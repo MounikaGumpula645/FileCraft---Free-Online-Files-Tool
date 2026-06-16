@@ -1,238 +1,209 @@
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Image to PDF Converter | FileCraft</title>
+    <title>Image to PDF - FileCraft</title>
 
-<link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/image-to-pdf.css">
 
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 </head>
-
 <body>
 
-<header>
+    <main class="pdf-tool">
 
-<div class="logo">
+        <!-- HEADER -->
 
-<img src="images/logo.png" alt="FileCraft Logo">
+        <section class="tool-header">
+            <h1>Image to PDF Converter</h1>
+            <p>
+                Convert JPG, PNG, WEBP, GIF and other images into a single PDF.
+            </p>
+        </section>
 
-<div>
-<h2>FileCraft</h2>
-<p>All-in-One File Tools</p>
+        <!-- UPLOAD -->
+
+        <section class="upload-section">
+
+            <div id="dropZone" class="drop-zone">
+
+                <div class="drop-content">
+
+                    <div class="upload-icon">
+                        📄
+                    </div>
+
+                    <h2>Drop Images Here</h2>
+
+                    <p>
+                        Drag & Drop Images or Select Files
+                    </p>
+
+                    <button id="selectBtn" class="primary-btn">
+                        Select Images
+                    </button>
+
+                    <input
+                        type="file"
+                        id="imageInput"
+                        accept="image/*"
+                        multiple
+                        hidden
+                    >
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- STATS -->
+
+        <section class="stats-section">
+
+            <div class="stat-card">
+                <span id="imageCount">0</span>
+                <small>Images</small>
+            </div>
+
+            <div class="stat-card">
+                <span id="totalSize">0 MB</span>
+                <small>Total Size</small>
+            </div>
+
+        </section>
+
+        <!-- SETTINGS -->
+
+        <section class="settings-section">
+
+            <h3>PDF Settings</h3>
+
+            <div class="settings-grid">
+
+                <div class="setting">
+                    <label for="pageSize">Page Size</label>
+<select id="pageSize">
+                        <option value="a4">A4</option>
+                        <option value="letter">Letter</option>
+                        <option value="legal">Legal</option>
+                    </select>
+                </div>
+
+                <div class="setting">
+                    <label for="orientation">Orientation</label>
+<select id="orientation">
+                        <option value="portrait">Portrait</option>
+                        <option value="landscape">Landscape</option>
+                        <option value="auto">Auto</option>
+                    </select>
+                </div>
+
+                <div class="setting">
+                   <label for="quality">Image Quality</label>
+<select id="quality">
+                        <option value="1">High</option>
+                        <option value="0.85">Medium</option>
+                        <option value="0.7">Low</option>
+                    </select>
+                </div>
+
+                <div class="setting">
+                   <label for="margin">Margin</label>
+<select id="margin">
+                        <option value="0">0 px</option>
+                        <option value="5">5 px</option>
+                        <option value="10" selected>10 px</option>
+                        <option value="20">20 px</option>
+                    </select>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ACTIONS -->
+
+        <section class="action-section">
+
+            <button id="clearBtn" class="secondary-btn">
+                Clear All
+            </button>
+
+            <button id="convertBtn" class="convert-btn">
+                Convert to PDF
+            </button>
+
+        </section>
+
+        <!-- PROGRESS -->
+
+        <section class="progress-section">
+
+            <div class="progress-bar">
+
+                <div id="progressFill"></div>
+
+            </div>
+
+            <div id="progressText">
+                Ready
+            </div>
+
+        </section>
+
+        <!-- PREVIEW -->
+
+        <section class="preview-section">
+
+            <div class="preview-header">
+
+                <h3>Selected Images</h3>
+
+                <span id="previewCount">
+                    0 Files
+                </span>
+
+            </div>
+
+            <div id="previewGrid" class="preview-grid">
+
+                <!-- thumbnails -->
+
+            </div>
+
+        </section>
+</main>
+
+<div id="loadingOverlay" class="loading-overlay hidden">
+
+    <div class="loading-card">
+
+        <div class="spinner"></div>
+
+        <h3 id="loadingTitle">
+            Creating PDF
+        </h3>
+
+        <p id="loadingStatus">
+            Preparing...
+        </p>
+
+        <div class="overlay-progress">
+
+            <div id="overlayProgressFill"></div>
+
+        </div>
+
+    </div>
+
 </div>
-
-</div>
-
-<nav>
-<a href="index.html">Home</a>
-<a href="index.html#tools">Tools</a>
-<a href="index.html#how-it-works">How It Works</a>
-<a href="index.html#contact">Contact</a>
-</nav>
-
-</header>
-
-<section class="tool-page">
-
-<h1>Image to PDF Converter</h1>
-
-<p>
-Convert JPG, PNG, JPEG and other image formats into a PDF instantly.
-</p>
-
-<div class="upload-box">
-
-<i class="fa-solid fa-cloud-arrow-up"></i>
-
-<h3>Select Image</h3>
-
-<p>Choose an image to convert into PDF</p>
-
-<input
-type="file"
-id="imageInput"
-accept="image/*"
-multiple>
-
-</div>
-
-<div
-id="previewContainer"
-class="preview-box">
-</div>
-
-<div class="btn-group">
-
-<button
-id="convertBtn"
-class="convert-btn">
-
-Convert To PDF
-
-</button>
-<div id="statusText"></div>
-</div>
-
-</section>
-
-<script>
-
-let selectedImages = [];
-
-const imageInput =
-document.getElementById("imageInput");
-
-const previewContainer =
-document.getElementById("previewContainer");
-
-imageInput.addEventListener("change",(e)=>{
-
-selectedImages =
-Array.from(e.target.files);
-
-previewContainer.innerHTML = "";
-
-selectedImages.forEach(file=>{
-
-const img =
-document.createElement("img");
-
-img.src =
-URL.createObjectURL(file);
-
-img.style.width =
-"150px";
-
-img.style.margin =
-"10px";
-
-img.style.borderRadius =
-"12px";
-
-previewContainer.appendChild(img);
-
-});
-
-});
-
-document
-.getElementById("convertBtn")
-.addEventListener("click",async()=>{
-const btn =
-document.getElementById("convertBtn");
-
-btn.disabled = true;
-
-btn.innerText =
-"Converting...";
-
-document
-.getElementById("statusText")
-.innerHTML =
-`Converting ${selectedImages.length} image(s)...`;
-
-if(selectedImages.length===0){
-
-alert(
-"Please select at least one image."
-);
-
-return;
-
-}
-
-const { jsPDF } =
-window.jspdf;
-
-const pdf =
-new jsPDF();
-
-for(
-let i=0;
-i<selectedImages.length;
-i++
-){
-
-const file =
-selectedImages[i];
-
-const imageData =
-await new Promise(resolve=>{
-
-const reader =
-new FileReader();
-
-reader.onload =
-e=>resolve(e.target.result);
-
-reader.readAsDataURL(file);
-
-});
-
-const img =
-await new Promise(resolve=>{
-
-const image =
-new Image();
-
-image.onload =
-()=>resolve(image);
-
-image.src =
-imageData;
-
-});
-
-if(i>0){
-
-pdf.addPage();
-
-}
-
-const pdfWidth =
-pdf.internal.pageSize.getWidth();
-
-const pdfHeight =
-(pdfWidth*img.height)
-/img.width;
-
-pdf.addImage(
-img,
-"JPEG",
-0,
-0,
-pdfWidth,
-pdfHeight
-);
-
-}
-
-pdf.save(
-"FileCraft-PDF.pdf"
-);
-btn.disabled = false;
-
-btn.innerText =
-"Convert To PDF";
-
-document
-.getElementById("statusText")
-.innerHTML =
-"✓ Download Started";
-
-});
-
-</script>
-
+<div id="toast"></div>
+<script src="js/image-to-pdf.js"></script>
 
 </body>
 </html>
